@@ -1,31 +1,42 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from sqlalchemy.orm import Session
+from uuid import uuid4
+
+from app.db.database import get_db
+from app.db.models import PDFDocument as Document
 from app.services.storage_service import save_uploaded_file
 from app.services.pdf_service import extract_text_from_pdf
-from uuid import uuid4
-import os
 
 router = APIRouter()
 
-ALLOWED_TYPES = ['application/pdf']
 
 @router.post("/")
-async def upload_pdf(file: UploadFile = File(...)):
-    #File type validation
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(status_code=400,detail="PDF files only")
-    
-    #Generate unique document id
+async def upload_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)):
+
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="Only PDF files allowed")
+
+    # create document id
     document_id = str(uuid4())
 
-    #Save file
-    try:
-        file_path = await save_uploaded_file(file,document_id)
-    except Exception as e:
-        raise HTTPException(status_code=500,detail=str(e))
+    #  save file
+    file_path = await save_uploaded_file(file, document_id)
+
+    # extract text
+    extracted_text = extract_text_from_pdf(file_path)
+
+    # save to database
+    document = Document(
+        id=document_id,
+        file_path=file_path,
+        extracted_text=extracted_text,
+        summary=""
+    )
+
+    db.add(document)
+    db.commit()
 
     return {
-        "message": "Upload endpoint is working!",
-        "document_id": document_id,
-        "file_path": file_path
-        }
-
+        "message": "File uploaded successfully",
+        "document_id": document_id
+    }
