@@ -5,6 +5,8 @@ _pycache_/
 *.pyo
 *.pyd
 *.sqlite3
+chromadb_store/
+*.db
 
 # Virtual Environment
 venv/

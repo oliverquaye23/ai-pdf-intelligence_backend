@@ -6,6 +6,9 @@ from app.db.database import get_db
 from app.db.models import PDFDocument as Document
 from app.services.storage_service import save_uploaded_file
 from app.services.pdf_service import extract_text_from_pdf
+from app.services.vector_service import store_document
+
+
 
 router = APIRouter()
 
@@ -36,7 +39,13 @@ async def upload_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
     db.add(document)
     db.commit()
 
+    store_document(extracted_text, document_id)
+
     return {
         "message": "File uploaded successfully",
         "document_id": document_id
     }
+
+#extracted_text = extract_text_from_pdf(file_path)
+
+#store_document(extracted_text)
