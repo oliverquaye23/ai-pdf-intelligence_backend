@@ -4,12 +4,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+_client = None
+
+def get_client():
+    global _client
+    if _client is None:
+        _client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    return _client
 
 def summarize_text(text: str) -> str:
     text = text[:4000]
 
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that answers questions and summarizes documents clearly."},
