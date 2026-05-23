@@ -14,3 +14,4 @@ requests
 google-generativeai
 httpx
 pytest
+groq
