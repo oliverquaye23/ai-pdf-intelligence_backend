@@ -8,7 +8,7 @@ pydantic
 PyPDF2
 pdfplumber
 chromadb
-sentence-transformers
+fastembed
 boto3
 requests
 google-generativeai
