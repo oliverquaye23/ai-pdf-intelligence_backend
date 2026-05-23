@@ -12,3 +12,5 @@ fastembed
 boto3
 requests
 google-generativeai
+httpx
+pytest
